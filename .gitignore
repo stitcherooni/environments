@@ -1,0 +1,17 @@
+# Compiled files
+*.tfstate
+*.tfstate.*.backup
+*.tfstate.backup
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+*.terraform.lock.hcl
+
+# Module directory
+**/.terraform/*
+.terraform/
+.terraform
+
+# Editors
+.vscode
+.DS_Store
