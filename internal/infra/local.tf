@@ -23,7 +23,7 @@ locals {
     "mysql_cidr_blocks" = {
       subnet_name       = "${local.env_name}-ptae-mysql-subnet"
       cidr              = element(local.subnet_cidr_blocks, 1) #["10.10.4.128/28"]
-      service_endpoints = ["Microsoft.Storage"]
+      service_endpoints = ["Microsoft.Storage","Microsoft.KeyVault"]
       delegations = {
         delegation_name = "Microsoft.DBforMySQL/flexibleServers"
         actions         = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
@@ -34,20 +34,22 @@ locals {
   #AKS
   aks_conf = {
     "internal_aks" = {
-      name                 = "${local.env_name}-ptae-aks-01"
-      azure_policy_enabled = true
-      sku_tier             = "Free"
-      kubernetes_version   = "1.27.1"
+      name                              = "${local.env_name}-ptae-aks-01"
+      azure_policy_enabled              = true
+      sku_tier                          = "Free"
+      kubernetes_version                = "1.27.1"
+      role_based_access_control_enabled = true
       azad_rbac = {
         rbac_managed       = true
-        azure_rbac_enabled = false
+        azure_rbac_enabled = true
+        tenant_id          = local.tenant_id
         admin_group_object_ids = [
           local.owners,
           "f0d65a66-583b-4952-86a5-035ad00a42cd", #stanislav.bahmet
           "b170c8f9-699e-4dc8-bab0-d711992d290c", #sergii.voichuk
           "2b0356ea-7015-469e-913c-9687658af716", #david.cooke
+          "eea5217b-f127-4fc1-b510-26d0a22c61fd", #internal-adm-sp-01
         ]
-        tenant_id = local.tenant_id
       }
       network_profile = {
         network_plugin = "azure"
@@ -73,13 +75,18 @@ locals {
   }
 
   #Azure Role Assignment
-  # role_assignment_params = {
-  #   "az_aks_cluster_admin" = {
-  #     scope                = module.pta_events.aks_id[local.aks_conf.internal_aks.name]
-  #     role_definition_name = "Azure Kubernetes Service Cluster Admin Role"
-  #     principal_id         = local.owners
-  #   }
-  # }
+  role_assignment_params = {
+    "az_aks_cluster_admin_group" = {
+      scope                = module.infra.aks_id[local.aks_conf.internal_aks.name]
+      role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+      principal_id         = local.owners
+    }
+    "az_aks_cluster_admin_sp" = {
+      scope                = module.infra.aks_id[local.aks_conf.internal_aks.name]
+      role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
+      principal_id         = data.azurerm_key_vault_secret.client_id.value
+    }
+  }
 
   tags = {
     managed_by = "Terraform"

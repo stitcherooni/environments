@@ -2,9 +2,21 @@ terraform {
   required_version = "~> 1.2"
 
   required_providers {
+    null = {
+      source = "hashicorp/null"
+      version = "3.2.1"
+    }
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = ">= 3.65.0"
+      version = ">= 3.66.0"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.10.1"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.22.0"
     }
   }
 
@@ -25,5 +37,55 @@ provider "azurerm" {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
+  }
+}
+
+provider "helm" {
+  kubernetes {
+    host = module.infra.aks_host[local.aks_conf.internal_aks.name]
+    cluster_ca_certificate = base64decode(module.infra.cluster_ca_certificate[local.aks_conf.internal_aks.name])
+    exec {
+      api_version = "client.authentication.k8s.io/v1"
+      command     = "kubelogin"
+      args = [
+        "get-token",
+        "--login",
+        "spn",
+        "--environment",
+        "AzurePublicCloud",
+        "--tenant-id",
+        "${yamldecode(module.infra.aks["internal-ptae-aks-01"].kube_config_raw).users[0].user.exec.args[8]}",
+        "--server-id",
+        "${yamldecode(module.infra.aks["internal-ptae-aks-01"].kube_config_raw).users[0].user.exec.args[4]}",
+        "--client-id",
+        data.azurerm_key_vault_secret.client_id.value,
+        "--client-secret",
+        data.azurerm_key_vault_secret.client_secret.value,
+      ]
+    }
+  }  
+}
+
+provider "kubernetes" {
+  host = module.infra.aks_host[local.aks_conf.internal_aks.name]
+  cluster_ca_certificate = base64decode(module.infra.cluster_ca_certificate[local.aks_conf.internal_aks.name])
+  exec {
+    api_version = "client.authentication.k8s.io/v1"
+    command     = "kubelogin"
+    args = [
+      "get-token",
+      "--login",
+      "spn",
+      "--environment",
+      "AzurePublicCloud",
+      "--tenant-id",
+      "${yamldecode(module.infra.aks["internal-ptae-aks-01"].kube_config_raw).users[0].user.exec.args[8]}",
+      "--server-id",
+      "${yamldecode(module.infra.aks["internal-ptae-aks-01"].kube_config_raw).users[0].user.exec.args[4]}",
+      "--client-id",
+      data.azurerm_key_vault_secret.client_id.value,
+      "--client-secret",
+      data.azurerm_key_vault_secret.client_secret.value,
+    ]
   }
 }
