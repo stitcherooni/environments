@@ -11,7 +11,7 @@ locals {
 
   #Subnet
   cidr_block         = element(local.address_space, 0)
-  subnet_cidr_blocks = [for cidr_block in cidrsubnets(local.cidr_block, 3, 9) : cidr_block]
+  subnet_cidr_blocks = [for cidr_block in cidrsubnets(local.cidr_block, 3, 9, 10) : cidr_block]
 
   subnet_cidr = {
     "aks_cidr_blocks" = {
@@ -23,11 +23,17 @@ locals {
     "mysql_cidr_blocks" = {
       subnet_name       = "${local.env_name}-ptae-mysql-subnet"
       cidr              = element(local.subnet_cidr_blocks, 1) #["10.10.4.128/28"]
-      service_endpoints = ["Microsoft.Storage","Microsoft.KeyVault"]
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
       delegations = {
         delegation_name = "Microsoft.DBforMySQL/flexibleServers"
         actions         = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
+    }
+    "service_cidr_blocks" = {
+      subnet_name       = "${local.env_name}-ptae-service-subnet"
+      cidr              = element(local.subnet_cidr_blocks, 2)
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
+      delegations       = {}
     }
   }
 
@@ -84,10 +90,36 @@ locals {
     "az_aks_cluster_admin_sp" = {
       scope                = module.infra.aks_id[local.aks_conf.internal_aks.name]
       role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
-      principal_id         = data.azurerm_key_vault_secret.client_id.value
+      principal_id         = data.azurerm_key_vault_secret.object_id.value
     }
   }
 
+  #Azure Private DNS 
+  private_dns_zone_conf = {
+    "mysql" = {
+      name = "private.mysql.database.azure.com"
+    }
+  }
+
+  #MySQL Flexible Server
+  mysql_conf = {
+    "internal_mysql" = {
+      name                  = "${local.env_name}-ptae-mysql"
+      private_dns_zone_name = local.private_dns_zone_conf.mysql.name
+      vnet_id               = module.infra.virtual_network_id
+      mysql_admin_password  = random_password.mysql_admin_password.result
+      backup_retention_days = 30
+      delegated_subnet_id   = module.infra.subnet_id[local.subnet_cidr.mysql_cidr_blocks.subnet_name]
+      private_dns_zone_id   = module.infra.private_dns_id[local.private_dns_zone_conf.mysql.name]
+      sku_name              = "B_Standard_B2s"
+      zone                  = 1
+      storage = {
+        size_gb = 100
+      }
+    }
+  }
+
+  #TAGS
   tags = {
     managed_by = "Terraform"
   }

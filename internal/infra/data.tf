@@ -10,3 +10,7 @@ data "azurerm_key_vault_secret" "client_secret" {
   key_vault_id = data.azurerm_key_vault.central.id
   name = "internal-adm-sp-pwd-01"
 }
+data "azurerm_key_vault_secret" "object_id" {
+  key_vault_id = data.azurerm_key_vault.central.id
+  name = "internal-adm-sp-obj-id"
+}

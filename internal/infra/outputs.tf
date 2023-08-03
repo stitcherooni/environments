@@ -22,3 +22,24 @@ output "aks" {
 output "ingress_pubip" {
   value = module.infra.ingress_pubip
 }
+
+#MySQL Flexible Server
+output "mysql_server_name" {
+  value = module.infra.mysql_server_name
+}
+output "mysql_server_id" {
+  value = module.infra.mysql_server_id
+}
+output "mysql_server_fqdn" {
+  value = module.infra.mysql_server_fqdn
+}
+output "mysql_server_login" {
+  value       = module.infra.mysql_server_login
+  sensitive   = true
+  description = "The Administrator login for the MySQL Flexible Server"
+}
+output "mysql_server_password" {
+  value       = module.infra.mysql_server_password
+  sensitive   = true
+  description = "The Password associated with the administrator_login for the MySQL Flexible Server"
+}

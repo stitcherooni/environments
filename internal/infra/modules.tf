@@ -17,7 +17,13 @@ module "infra" {
   aks_conf = local.aks_conf
 
   #Azure Role Assignment
-  #role_assignment_params = local.role_assignment_params
+  role_assignment_params = local.role_assignment_params
+
+  #Azure Private DNS 
+  private_dns_zone_conf = local.private_dns_zone_conf
+
+  #MySQL Flexible Server
+  mysql_conf = local.mysql_conf
 
   #Tags
   tags = local.tags
