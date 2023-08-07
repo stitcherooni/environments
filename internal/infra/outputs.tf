@@ -1,3 +1,11 @@
+#Main
+output "resource_group_name" {
+  value = module.infra.resource_group_name
+}
+output "resource_group_id" {
+  value = module.infra.resource_group_id
+}
+
 #AKS
 output "aks_name" {
   value = module.infra.aks_name
@@ -42,4 +50,12 @@ output "mysql_server_password" {
   value       = module.infra.mysql_server_password
   sensitive   = true
   description = "The Password associated with the administrator_login for the MySQL Flexible Server"
+}
+
+#MySQL Flexible Server Database
+output "mysql_dev_db_name" {
+  value = azurerm_mysql_flexible_database.ptaevent_dev.name
+}
+output "mysql_dev_db_id" {
+  value = azurerm_mysql_flexible_database.ptaevent_dev.id
 }
