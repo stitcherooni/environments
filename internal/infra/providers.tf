@@ -42,8 +42,8 @@ provider "azurerm" {
 
 provider "helm" {
   kubernetes {
-    host = module.infra.aks_host[local.aks_conf.internal_aks.name]
-    cluster_ca_certificate = base64decode(module.infra.cluster_ca_certificate[local.aks_conf.internal_aks.name])
+    host = module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.host
+    cluster_ca_certificate = base64decode(module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.cluster_ca_certificate)
     exec {
       api_version = "client.authentication.k8s.io/v1"
       command     = "kubelogin"
@@ -67,8 +67,8 @@ provider "helm" {
 }
 
 provider "kubernetes" {
-  host = module.infra.aks_host[local.aks_conf.internal_aks.name]
-  cluster_ca_certificate = base64decode(module.infra.cluster_ca_certificate[local.aks_conf.internal_aks.name])
+  host = module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.host
+  cluster_ca_certificate = base64decode(module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.cluster_ca_certificate)
   exec {
     api_version = "client.authentication.k8s.io/v1"
     command     = "kubelogin"

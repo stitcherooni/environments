@@ -1,3 +1,4 @@
+#Azure central Key Vault
 data "azurerm_key_vault" "central" {
   name                = "central-kv-01"
   resource_group_name = "az_central"
@@ -13,4 +14,10 @@ data "azurerm_key_vault_secret" "client_secret" {
 data "azurerm_key_vault_secret" "object_id" {
   key_vault_id = data.azurerm_key_vault.central.id
   name = "internal-adm-sp-obj-id"
+}
+
+#Azure ACR
+data "azurerm_container_registry" "azcentralcr" {
+  name                = "azcentralcr"
+  resource_group_name = "az_central"
 }

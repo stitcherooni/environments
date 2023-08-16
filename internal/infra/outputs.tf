@@ -14,15 +14,23 @@ output "aks_id" {
   value = module.infra.aks_id
 }
 output "aks_host" {
-  value     = module.infra.aks_host
+  value     = module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.host
   sensitive = true
 }
 output "cluster_ca_certificate" {
-  value     = module.infra.cluster_ca_certificate
+  value     = module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.cluster_ca_certificate
+  sensitive = true
+}
+output "az_kube_config" {
+  value     = module.infra.az_kube_config
+  sensitive = true
+}
+output "az_kubelet_identity" {
+  value     = module.infra.az_kubelet_identity
   sensitive = true
 }
 output "aks" {
-  value     = "${yamldecode(module.infra.aks["internal-ptae-aks-01"].kube_config_raw).users[0].user.exec.args}"
+  value     = "${yamldecode(module.infra.aks[local.aks_conf.internal_aks.name].kube_config_raw).users[0].user.exec.args}"
   sensitive = true
 }
 

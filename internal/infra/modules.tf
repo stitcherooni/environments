@@ -25,6 +25,9 @@ module "infra" {
   #MySQL Flexible Server
   mysql_conf = local.mysql_conf
 
+  #Azure Bastion Host
+  bastion_conf = local.bastion_conf
+
   #Tags
   tags = local.tags
 }

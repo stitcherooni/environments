@@ -11,7 +11,7 @@ locals {
 
   #Subnet
   cidr_block         = element(local.address_space, 0)
-  subnet_cidr_blocks = [for cidr_block in cidrsubnets(local.cidr_block, 3, 9, 10) : cidr_block]
+  subnet_cidr_blocks = [for cidr_block in cidrsubnets(local.cidr_block, 3, 9, 7, 7) : cidr_block]
 
   subnet_cidr = {
     "aks_cidr_blocks" = {
@@ -29,9 +29,15 @@ locals {
         actions         = ["Microsoft.Network/virtualNetworks/subnets/join/action"]
       }
     }
+    "bastion_cidr_blocks" = {
+      subnet_name       = "AzureBastionSubnet"
+      cidr              = element(local.subnet_cidr_blocks, 2)
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
+      delegations       = {}
+    }
     "service_cidr_blocks" = {
       subnet_name       = "${local.env_name}-ptae-service-subnet"
-      cidr              = element(local.subnet_cidr_blocks, 2)
+      cidr              = element(local.subnet_cidr_blocks, 3)
       service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
       delegations       = {}
     }
@@ -92,6 +98,12 @@ locals {
       role_definition_name = "Azure Kubernetes Service RBAC Cluster Admin"
       principal_id         = data.azurerm_key_vault_secret.object_id.value
     }
+    "az_aks_acr_integration" = {
+      scope                            = data.azurerm_container_registry.azcentralcr.id
+      role_definition_name             = "App Compliance Automation Administrator"
+      principal_id                     = module.infra.az_kubelet_identity[local.aks_conf.internal_aks.name].0.object_id
+      skip_service_principal_aad_check = true
+    }
   }
 
   #Azure Private DNS 
@@ -115,6 +127,18 @@ locals {
       zone                  = 1
       storage = {
         size_gb = 100
+      }
+    }
+  }
+
+  #Azure Bastion Host
+  bastion_conf = {
+    "internal_bastion_host" = {
+      name = "${local.env_name}-ptae-bastion"
+
+      ip_configuration = {
+        subnet_id = module.infra.subnet_id[local.subnet_cidr.bastion_cidr_blocks.subnet_name]
+        public_ip_address_id = module.infra.bastion_pubip
       }
     }
   }
