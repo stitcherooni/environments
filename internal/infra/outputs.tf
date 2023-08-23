@@ -21,6 +21,10 @@ output "cluster_ca_certificate" {
   value     = module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.cluster_ca_certificate
   sensitive = true
 }
+output "tenant_id" {
+  value     = "${yamldecode(module.infra.aks["internal-ptae-aks-01"].kube_config_raw).users[0].user.exec.args[8]}"
+  sensitive = true
+}
 output "az_kube_config" {
   value     = module.infra.az_kube_config
   sensitive = true
