@@ -8,7 +8,7 @@ terraform {
     }
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.22.0"
+      version = "2.23.0"
     }
   }
 
@@ -33,8 +33,8 @@ provider "azurerm" {
 }
 
 provider "kubernetes" {
-  host = module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.host
-  cluster_ca_certificate = base64decode(module.infra.az_kube_config[local.aks_conf.internal_aks.name].0.cluster_ca_certificate)
+  host = data.terraform_remote_state.internal_infra.outputs.aks_host
+  cluster_ca_certificate = base64decode(data.terraform_remote_state.internal_infra.outputs.cluster_ca_certificate)
   exec {
     api_version = "client.authentication.k8s.io/v1"
     command     = "kubelogin"
@@ -45,9 +45,9 @@ provider "kubernetes" {
       "--environment",
       "AzurePublicCloud",
       "--tenant-id",
-      data.terraform_remote_state.internal_infra.tenant_id,
+      data.terraform_remote_state.internal_infra.outputs.tenant_id,
       "--server-id",
-      data.terraform_remote_state.internal_infra.server_id,
+      data.terraform_remote_state.internal_infra.outputs.server_id,
       "--client-id",
       data.azurerm_key_vault_secret.client_id.value,
       "--client-secret",

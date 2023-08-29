@@ -1,4 +1,8 @@
 locals {
+  #Main
+  tenant_id       = "ff9085aa-053a-4b01-8817-effac5fdfdce"
+  subscription_id = "31ee4a72-709d-4b02-bd0e-30b59dee8a4c"
+
   secret = {
     "secret1" = {
       type = "kubernetes.io/basic-auth"
@@ -13,11 +17,12 @@ locals {
     }
   }
 
+  #Azure Build Agent Deployment
   deployment_conf = {
     "internal_build_agent" = {
       metadata = {
-        name      = agent
-        namespace = kubernetes_namespace.internal_build_agent.name
+        name      = "agent"
+        namespace = kubernetes_namespace.internal_build_agent.id
         labels = {
           "app.kubernetes.io/name"     = "azure-pipelines-agent"
           "app.kubernetes.io/instance" = "agent"
@@ -30,52 +35,67 @@ locals {
             "app.kubernetes.io/name"     = "azure-pipelines-agent"
             "app.kubernetes.io/instance" = "agent"
           }
-          template = {
-            metadata = {
-              labels = {
-                "app.kubernetes.io/name"     = "azure-pipelines-agent"
-                "app.kubernetes.io/instance" = "agent"
-              }
+        }
+        template = {
+          metadata = {
+            labels = {
+              "app.kubernetes.io/name"     = "azure-pipelines-agent"
+              "app.kubernetes.io/instance" = "agent"
             }
-            spec = {
-              container = {
-                name              = "azure-pipelines-agent"
-                image             = "azcentralcr.azurecr.io/az-self-hosted-agent:latest"
-                image_pull_policy = "Always"
+          }
+          spec = {
+            container = {
+              name              = "azure-pipelines-agent"
+              image             = "azcentralcr.azurecr.io/az-self-hosted-agent:latest"
+              image_pull_policy = "Always"
 
-                env = [
-                  {
-                    name = "AZP_AGENT_NAME"
-                    value_from = {
-                      field_ref = {
-                        api_version = "v1"
-                        field_path  = local.deployment_conf.internal_build_agent
-                      }
-                    }
-                  },
-                  {
-                    name = "AZP_URL"
-                    value = "https://dev.azure.com/ptaevents"
-                  },
-                  {
-                    name = "AZP_POOL"
-                    value = "internal-agent"
-                  },
-                  {
-                    name = "AZP_POOL"
-                    value_from = {
-                      secret_key_ref = {
-                        name = "azdevops"
-                        key = "AZP_TOKEN"
-                      }
+              env = [
+                {
+                  name = "AZP_AGENT_NAME"
+                  value_from = {
+                    field_ref = {
+                      api_version = "v1"
+                      field_path  = "metadata.name"
                     }
                   }
-                ]
-              }
+                },
+                {
+                  name  = "AZP_URL"
+                  value = "https://dev.azure.com/ptaevents"
+                },
+                {
+                  name  = "AZP_POOL"
+                  value = "internal-agent"
+                },
+                {
+                  name = "AZP_TOKEN"
+                  value_from = {
+                    secret_key_ref = {
+                      name = "azdevops"
+                      key  = "AZP_TOKEN"
+                    }
+                  }
+                }
+              ]
             }
           }
         }
       }
     }
+  }
+
+  #KEDA config (Internal Build Agent Scaling)
+  internal_build_agent_scaling = {
+    name        = "agent-scaler"
+    namespace   = kubernetes_namespace.internal_build_agent.id
+    labels_name = local.deployment_conf.internal_build_agent.metadata.name
+
+    min_replica_count = "1"
+    max_replica_count = "3"
+    polling_interval = 20
+
+    azp_pool_id = 10
+    azp_url  = local.deployment_conf.internal_build_agent.spec.template.spec.container.env.1.name
+    azp_token = local.deployment_conf.internal_build_agent.spec.template.spec.container.env.3.name
   }
 }
