@@ -4,15 +4,14 @@ locals {
   subscription_id = "31ee4a72-709d-4b02-bd0e-30b59dee8a4c"
 
   secret = {
-    "secret1" = {
-      type = "kubernetes.io/basic-auth"
+    "azp-token" = {
+      type = "Opaque"
       metadata = {
-        secret_name = "basic-auth1"
-        namespace   = "default"
+        secret_name = "azp-token"
+        namespace   = "internal-build-agent"
       }
       secret_data = {
-        username = "admin1"
-        password = "P4ssw0rd1"
+        AZP_TOKEN = data.azurerm_key_vault_secret.azp_token.value
       }
     }
   }
@@ -71,7 +70,7 @@ locals {
                   name = "AZP_TOKEN"
                   value_from = {
                     secret_key_ref = {
-                      name = "azdevops"
+                      name = local.secret.azp-token.metadata.secret_name
                       key  = "AZP_TOKEN"
                     }
                   }

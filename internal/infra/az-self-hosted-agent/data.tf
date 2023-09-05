@@ -27,3 +27,7 @@ data "azurerm_key_vault_secret" "object_id" {
   key_vault_id = data.azurerm_key_vault.central.id
   name = "internal-adm-sp-obj-id"
 }
+data "azurerm_key_vault_secret" "azp_token" {
+  key_vault_id = data.azurerm_key_vault.central.id
+  name = "azp-token"
+}

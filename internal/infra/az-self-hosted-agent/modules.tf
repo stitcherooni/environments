@@ -1,8 +1,8 @@
-# module "az_aks_secret" {
-#   source = "../"
+module "az_aks_secret" {
+  source = "git::https://ptaevents@dev.azure.com/ptaevents/pta-events.co.uk/_git/terraform//modules/kubernetes-secret"
   
-#   secret = local.secret
-# }
+  secret = local.secret
+}
 
 module "az_aks_deployment" {
   source = "git::https://ptaevents@dev.azure.com/ptaevents/pta-events.co.uk/_git/terraform//modules/kubernetes-deployment"
