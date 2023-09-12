@@ -5,6 +5,11 @@ locals {
   owners          = "65e0258d-d870-4255-9835-4e7d3030e48b" #Owners AzureAD Group
   location        = "uksouth"
   env_name        = "internal"
+  dns_zone_name   = "pta-events.com"
+  namespace       = {
+    dev = "dev",
+    qa  = "qa",
+  }
 
   #VNet
   address_space = ["10.10.0.0/19"]
@@ -143,6 +148,21 @@ locals {
     }
   }
 
+  #Azure Kubernetes Secret
+  secret = {
+    "dev_pta_events_com" = {
+      type = "kubernetes.io/tls"
+      metadata = {
+        secret_name = local.dns_zone_name
+        namespace   = local.namespace.dev
+      }
+      secret_data = {
+        "tls.crt" = data.azurerm_key_vault_secret.pta_events_com_pem.value
+        "tls.key" = data.azurerm_key_vault_secret.pta_events_com_key.value
+      }
+    }
+  }
+    
   #TAGS
   tags = {
     managed_by = "Terraform"

@@ -28,6 +28,9 @@ module "infra" {
   #Azure Bastion Host
   bastion_conf = local.bastion_conf
 
+  #Azure Kubernetes Secret
+  secret = local.secret
+
   #Tags
   tags = local.tags
 }
