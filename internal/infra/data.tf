@@ -15,6 +15,7 @@ data "azurerm_key_vault_secret" "object_id" {
   key_vault_id = data.azurerm_key_vault.central.id
   name = "internal-adm-sp-obj-id"
 }
+
 #Get data with SSL pem and key from key-vault
 data "azurerm_key_vault_secret" "pta_events_com_pem" {
   name         = "pta-events-com-pem"
