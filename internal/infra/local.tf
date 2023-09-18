@@ -77,9 +77,9 @@ locals {
         vnet_subnet_id = module.infra.subnet_id[local.subnet_cidr.aks_cidr_blocks.subnet_name]
         #zones              = [2]
         enable_auto_scaling = true
-        node_count          = "1"
-        min_count           = "1"
-        max_count           = "3"
+        node_count          = "2"
+        min_count           = "2"
+        max_count           = "4"
       }
       # api_server_access_profile = {
       #   vnet_integration_enabled = false
