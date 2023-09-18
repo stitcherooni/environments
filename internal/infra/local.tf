@@ -157,7 +157,7 @@ locals {
         namespace   = local.namespace.dev
       }
       secret_data = {
-        "tls.crt" = data.azurerm_key_vault_secret.pta_events_com_pem.value
+        "tls.crt" = data.azurerm_key_vault_secret.pta_events_com_crt.value
         "tls.key" = data.azurerm_key_vault_secret.pta_events_com_key.value
       }
     }

@@ -17,8 +17,8 @@ data "azurerm_key_vault_secret" "object_id" {
 }
 
 #Get data with SSL pem and key from key-vault
-data "azurerm_key_vault_secret" "pta_events_com_pem" {
-  name         = "pta-events-com-pem"
+data "azurerm_key_vault_secret" "pta_events_com_crt" {
+  name         = "star-pta-events-com"
   key_vault_id = data.azurerm_key_vault.central.id
 }
 data "azurerm_key_vault_secret" "pta_events_com_key" {
