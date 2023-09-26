@@ -26,7 +26,7 @@ module "infra" {
   mysql_conf = local.mysql_conf
 
   #Azure Bastion Host
-  bastion_conf = local.bastion_conf
+#  bastion_conf = local.bastion_conf
 
   #Azure Kubernetes Secret
   secret = local.secret

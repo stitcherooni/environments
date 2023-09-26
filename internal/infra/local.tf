@@ -6,7 +6,7 @@ locals {
   location        = "uksouth"
   env_name        = "internal"
   dns_zone_name   = "pta-events.com"
-  namespace       = {
+  namespace = {
     dev = "dev",
     qa  = "qa",
   }
@@ -73,13 +73,14 @@ locals {
         network_policy = "azure"
       }
       default_node_pool = {
-        vm_size        = "Standard_D2as_v4"
-        vnet_subnet_id = module.infra.subnet_id[local.subnet_cidr.aks_cidr_blocks.subnet_name]
-        #zones              = [2]
-        enable_auto_scaling = true
-        node_count          = "2"
-        min_count           = "2"
-        max_count           = "4"
+        vm_size                     = "Standard_D4ps_v5"
+        vnet_subnet_id              = module.infra.subnet_id[local.subnet_cidr.aks_cidr_blocks.subnet_name]
+        #zones                       = [2]
+        enable_auto_scaling         = true
+        node_count                  = "1"
+        min_count                   = "1"
+        max_count                   = "3"
+        temporary_name_for_rotation = "tempnodepool"
       }
       # api_server_access_profile = {
       #   vnet_integration_enabled = false
@@ -137,16 +138,16 @@ locals {
   }
 
   #Azure Bastion Host
-  bastion_conf = {
-    "internal_bastion_host" = {
-      name = "${local.env_name}-ptae-bastion"
+  # bastion_conf = {
+  #   "internal_bastion_host" = {
+  #     name = "${local.env_name}-ptae-bastion"
 
-      ip_configuration = {
-        subnet_id = module.infra.subnet_id[local.subnet_cidr.bastion_cidr_blocks.subnet_name]
-        public_ip_address_id = module.infra.bastion_pubip
-      }
-    }
-  }
+  #     ip_configuration = {
+  #       subnet_id = module.infra.subnet_id[local.subnet_cidr.bastion_cidr_blocks.subnet_name]
+  #       public_ip_address_id = module.infra.bastion_pubip
+  #     }
+  #   }
+  # }
 
   #Azure Kubernetes Secret
   secret = {
@@ -162,7 +163,7 @@ locals {
       }
     }
   }
-    
+
   #TAGS
   tags = {
     managed_by = "Terraform"
