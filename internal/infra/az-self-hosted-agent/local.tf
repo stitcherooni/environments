@@ -47,7 +47,16 @@ locals {
               name              = "azure-pipelines-agent"
               image             = "azcentralcr.azurecr.io/az-self-hosted-agent:arm64"
               image_pull_policy = "Always"
-
+              resources = {
+                limits = {
+                  #cpu    = "0.5"
+                  memory = "6Gi"
+                }
+                requests = {
+                  #cpu    = "250m"
+                  #memory = "50Mi"
+                }      
+              }
               env = [
                 {
                   name = "AZP_AGENT_NAME"
