@@ -45,7 +45,7 @@ locals {
           spec = {
             container = {
               name              = "azure-pipelines-agent"
-              image             = "azcentralcr.azurecr.io/az-self-hosted-agent:latest"
+              image             = "azcentralcr.azurecr.io/az-self-hosted-agent:arm64"
               image_pull_policy = "Always"
 
               env = [
