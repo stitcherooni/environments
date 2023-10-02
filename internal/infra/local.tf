@@ -162,6 +162,17 @@ locals {
         "tls.key" = data.azurerm_key_vault_secret.pta_events_com_key.value
       }
     }
+    "qa_pta_events_com" = {
+      type = "kubernetes.io/tls"
+      metadata = {
+        secret_name = local.dns_zone_name
+        namespace   = local.namespace.qa
+      }
+      secret_data = {
+        "tls.crt" = data.azurerm_key_vault_secret.pta_events_com_crt.value
+        "tls.key" = data.azurerm_key_vault_secret.pta_events_com_key.value
+      }
+    }
   }
 
   #TAGS
